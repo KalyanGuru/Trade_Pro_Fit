@@ -1,0 +1,23 @@
+name: tread_pro_fit_server
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  drift: ^2.18.0
+  drift_dev: ^2.18.0
+  sqlite3: ^2.4.0
+  path: ^1.9.0
+  shelf: ^1.4.1
+  shelf_router: ^1.1.4
+  shelf_cors_headers: ^0.1.5
+  shelf_web_socket: ^1.0.4
+  http: ^1.2.2
+  dotenv: ^4.2.0
+  ml_algo: ^16.14.0
+  ml_linalg: ^13.12.6
+  collection: ^1.18.0
+  crypto: ^3.0.7
+
+
+dev_dependencies:
+  build_runner: ^2.4.7
