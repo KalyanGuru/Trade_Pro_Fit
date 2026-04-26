@@ -1,6 +1,6 @@
 class Env {
   static const backendBase = String.fromEnvironment(
     'BACKEND_BASE',
-    defaultValue: 'http://localhost:8080',
+    defaultValue: 'http://localhost:9090',
   );
 }
