@@ -1,76 +1,295 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+
 import '../../data/api_client.dart';
 import '../../data/models.dart';
-import '../../data/ws.dart';
-import '../../widgets/charts.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../search/search_page.dart';
 import '../auth/auth_page.dart';
 
-class LivePage extends ConsumerStatefulWidget {
+class LivePage extends StatefulWidget {
   const LivePage({super.key});
+
   @override
-  ConsumerState<LivePage> createState() => _LivePageState();
+  State<LivePage> createState() => _LivePageState();
 }
 
-class _LivePageState extends ConsumerState<LivePage> {
-  Instrument? picked;
-  final prices = <double>[];
-  List<double> predCurve = [];
+class _LivePageState extends State<LivePage> {
   final api = ApiClient();
-  final ws = WsClient();
 
-  void _connect() {
-    if (picked == null) return;
-    ws.connect([picked!.key], (ticks) {
-      if (ticks.isNotEmpty) {
-        final t = Tick.fromJson(ticks.first);
-        setState(() {
-          prices.add(t.ltp);
-          if (prices.length > 300) prices.removeAt(0);
-        });
-      }
-    });
-    _fetchPred();
+  Instrument? picked;
+
+  Timer? timer;
+
+  double ltp = 0.0;
+  String trend = "-";
+  int confidence = 0;
+
+  List<double> priceHistory = [];
+
+  // -----------------------------------
+  // START AUTO REFRESH
+  // -----------------------------------
+  void startLive() {
+    timer?.cancel();
+
+    timer = Timer.periodic(
+      const Duration(seconds: 3),
+          (_) => loadData(),
+    );
+
+    loadData();
   }
 
-  Future<void> _fetchPred() async {
+  // -----------------------------------
+  // LOAD LIVE + PREDICTION
+  // -----------------------------------
+  Future<void> loadData() async {
     if (picked == null) return;
-    final r = await api.getPrediction(picked!.key);
-    final curve = List<double>.from(r['curve']?.map((e) => (e as num).toDouble()) ?? []);
-    setState(() { predCurve = curve; });
+
+    try {
+      final live =
+      await api.getLivePrice(picked!.key);
+
+      final pred =
+      await api.getPrediction(picked!.key);
+
+      setState(() {
+        ltp =
+            (live['ltp'] as num)
+                .toDouble();
+
+        trend =
+            pred['trend']
+                ?.toString() ??
+                '-';
+
+        confidence =
+            pred['confidence'] ?? 0;
+
+        priceHistory.add(ltp);
+
+        if (priceHistory.length > 30) {
+          priceHistory.removeAt(0);
+        }
+      });
+    } catch (_) {}
   }
 
   @override
   void dispose() {
-    ws.close();
+    timer?.cancel();
     super.dispose();
   }
 
+  // -----------------------------------
+  // UI
+  // -----------------------------------
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding:
+      const EdgeInsets.all(16),
       children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(picked?.symbol ?? 'Pick stock', style: Theme.of(context).textTheme.titleLarge),
-          ElevatedButton(onPressed: () async {
-            await showDialog(context: context, builder: (_) {
-              return AlertDialog(content: SizedBox(width: 400, child: SearchPage(onPick: (ins) {
-                setState(() { picked = ins; prices.clear(); predCurve = []; });
-                Navigator.pop(context);
-                _connect();
-              })));
-            });
-          }, child: const Text('Search')),
-          OutlinedButton(onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => AuthPage()));
-          }, child: const Text('Connect Upstox')),
-        ]),
-        const SizedBox(height: 12),
-        if (prices.isNotEmpty) LineChartSimple(title: 'Live LTP', y: prices),
-        const SizedBox(height: 16),
-        if (predCurve.isNotEmpty) LineChartSimple(title: 'Predicted 60 min curve', y: predCurve),
+        Row(
+          mainAxisAlignment:
+          MainAxisAlignment
+              .spaceBetween,
+          children: [
+            Text(
+              picked?.symbol ??
+                  'Pick Stock',
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight:
+                FontWeight.bold,
+              ),
+            ),
+
+            ElevatedButton(
+              onPressed: () async {
+                await showDialog(
+                  context: context,
+                  builder: (_) {
+                    return AlertDialog(
+                      content:
+                      SizedBox(
+                        width: 450,
+                        child:
+                        SearchPage(
+                          onPick:
+                              (ins) {
+                            setState(() {
+                              picked =
+                                  ins;
+                              priceHistory
+                                  .clear();
+                            });
+
+                            Navigator.pop(
+                                context);
+
+                            startLive();
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              child:
+              const Text(
+                  "Search"),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 20),
+
+        if (picked != null) ...[
+          Card(
+            elevation: 5,
+            child: Padding(
+              padding:
+              const EdgeInsets.all(
+                  16),
+              child: Column(
+                children: [
+                  Text(
+                    "Live Price",
+                    style:
+                    TextStyle(
+                      fontSize:
+                      18,
+                      color: Colors
+                          .grey[700],
+                    ),
+                  ),
+
+                  const SizedBox(
+                      height: 10),
+
+                  Text(
+                    "₹ ${ltp.toStringAsFixed(2)}",
+                    style:
+                    const TextStyle(
+                      fontSize:
+                      32,
+                      fontWeight:
+                      FontWeight.bold,
+                      color:
+                      Colors.green,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 15),
+
+          Card(
+            elevation: 5,
+            child: Padding(
+              padding:
+              const EdgeInsets.all(
+                  16),
+              child: Column(
+                children: [
+                  const Text(
+                    "Next 1 Hour Prediction",
+                    style:
+                    TextStyle(
+                      fontSize:
+                      18,
+                    ),
+                  ),
+
+                  const SizedBox(
+                      height: 12),
+
+                  Text(
+                    trend,
+                    style:
+                    TextStyle(
+                      fontSize:
+                      28,
+                      fontWeight:
+                      FontWeight.bold,
+                      color: trend ==
+                          "UP"
+                          ? Colors.green
+                          : Colors.red,
+                    ),
+                  ),
+
+                  const SizedBox(
+                      height: 8),
+
+                  Text(
+                    "Confidence: $confidence%",
+                    style:
+                    const TextStyle(
+                      fontSize:
+                      16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 15),
+
+          Card(
+            child: Padding(
+              padding:
+              const EdgeInsets.all(
+                  16),
+              child: Column(
+                crossAxisAlignment:
+                CrossAxisAlignment
+                    .start,
+                children: [
+                  const Text(
+                    "Recent Prices",
+                    style:
+                    TextStyle(
+                      fontSize:
+                      18,
+                    ),
+                  ),
+                  const SizedBox(
+                      height: 10),
+
+                  Text(
+                    priceHistory
+                        .map((e) => e
+                        .toStringAsFixed(
+                        1))
+                        .join(
+                        "  |  "),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+
+        const SizedBox(height: 20),
+
+        OutlinedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                const AuthPage(),
+              ),
+            );
+          },
+          child: const Text(
+              "Connect Upstox"),
+        ),
       ],
     );
   }

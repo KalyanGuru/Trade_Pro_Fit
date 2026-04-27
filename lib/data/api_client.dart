@@ -4,39 +4,70 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiClient {
+  /// Backend running in Dart server
   static const String baseUrl = 'http://localhost:9090';
 
-  // -----------------------------------
-  // AUTH
-  // -----------------------------------
-  String get authUrl => '$baseUrl/auth/login';
+  // =====================================================
+  // COMMON GET REQUEST
+  // =====================================================
 
-  // -----------------------------------
-  // HEALTH
-  // -----------------------------------
-  Future<Map<String, dynamic>> health() async {
-    final res = await http.get(Uri.parse('$baseUrl/health'));
+  Future<dynamic> _get(String endpoint) async {
+    final uri = Uri.parse('$baseUrl$endpoint');
 
-    if (res.statusCode == 200) {
-      return Map<String, dynamic>.from(jsonDecode(res.body));
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
     }
 
-    throw Exception('Backend not responding');
+    throw Exception(
+      'Request failed (${response.statusCode}) -> $endpoint',
+    );
   }
 
-  // -----------------------------------
-  // SEARCH INSTRUMENTS
-  // -----------------------------------
+  // =====================================================
+  // AUTH
+  // =====================================================
+
+  String get authUrl => '$baseUrl/auth/login';
+
+  // =====================================================
+  // HEALTH CHECK
+  // =====================================================
+
+  Future<Map<String, dynamic>> health() async {
+    final data = await _get('/health');
+
+    return Map<String, dynamic>.from(data);
+  }
+
+  Future<bool> isConnected() async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/auth/status'),
+    );
+
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      return data['connected'] == true;
+    }
+
+    return false;
+  }
+
+  // =====================================================
+  // SEARCH STOCKS / INSTRUMENTS
+  // =====================================================
+
   Future<List<Map<String, dynamic>>> searchInstruments(
       String query,
       ) async {
-    final res = await http.get(
-      Uri.parse('$baseUrl/instruments/search?q=$query'),
+    if (query.trim().isEmpty) return [];
+
+    final data = await _get(
+      '/instruments/search?q=${Uri.encodeComponent(query)}',
     );
 
-    if (res.statusCode == 200) {
-      final data = jsonDecode(res.body) as List;
-
+    if (data is List) {
       return data
           .map((e) => Map<String, dynamic>.from(e))
           .toList();
@@ -45,36 +76,26 @@ class ApiClient {
     return [];
   }
 
-  // -----------------------------------
-  // PREDICTION
-  // -----------------------------------
+  // =====================================================
+  // GET AI PREDICTION
+  // =====================================================
+
   Future<Map<String, dynamic>> getPrediction(
-      String key,
+      String instrumentKey,
       ) async {
-    final res = await http.get(
-      Uri.parse('$baseUrl/predict/$key'),
-    );
+    final data = await _get('/predict/$instrumentKey');
 
-    if (res.statusCode == 200) {
-      return Map<String, dynamic>.from(
-        jsonDecode(res.body),
-      );
-    }
-
-    return {};
+    return Map<String, dynamic>.from(data);
   }
 
-  // -----------------------------------
-  // CLUSTERS
-  // -----------------------------------
+  // =====================================================
+  // GET CLUSTER DATA
+  // =====================================================
+
   Future<List<Map<String, dynamic>>> getClusters() async {
-    final res = await http.get(
-      Uri.parse('$baseUrl/clusters'),
-    );
+    final data = await _get('/clusters');
 
-    if (res.statusCode == 200) {
-      final data = jsonDecode(res.body) as List;
-
+    if (data is List) {
       return data
           .map((e) => Map<String, dynamic>.from(e))
           .toList();
@@ -83,22 +104,33 @@ class ApiClient {
     return [];
   }
 
-  // -----------------------------------
+  // =====================================================
   // LIVE PRICE
-  // -----------------------------------
-  Future<Map<String, dynamic>> getLivePrice(
-      String key,
-      ) async {
-    final res = await http.get(
-      Uri.parse('$baseUrl/live/$key'),
-    );
+  // =====================================================
 
-    if (res.statusCode == 200) {
-      return Map<String, dynamic>.from(
-        jsonDecode(res.body),
-      );
+  Future<Map<String, dynamic>> getLivePrice(
+      String instrumentKey,
+      ) async {
+    final data = await _get('/live/$instrumentKey');
+
+    return Map<String, dynamic>.from(data);
+  }
+
+  // =====================================================
+  // OHLC CANDLE DATA
+  // =====================================================
+
+  Future<List<Map<String, dynamic>>> getCandles(
+      String instrumentKey,
+      ) async {
+    final data = await _get('/candles/$instrumentKey');
+
+    if (data is List) {
+      return data
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
     }
 
-    return {};
+    return [];
   }
 }

@@ -1,6 +1,8 @@
 // server/bin/server.dart
 
+import 'dart:convert';
 import 'dart:io';
+
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
@@ -42,7 +44,7 @@ Future<void> main() async {
   // =========================================
   app.get('/health', (Request req) {
     return Response.ok(
-      '{"status":"ok"}',
+      jsonEncode({"status": "ok"}),
       headers: {'Content-Type': 'application/json'},
     );
   });
@@ -61,9 +63,7 @@ Future<void> main() async {
 
       final loginUrl = api.authUrl(challenge);
 
-      return Response.found(
-        loginUrl.toString(),
-      );
+      return Response.found(loginUrl.toString());
     } catch (e) {
       return Response.internalServerError(
         body: 'Login Error: $e',
@@ -84,29 +84,42 @@ Future<void> main() async {
     }
 
     try {
-      final verifier =
-          await api.readTempVerifier() ?? '';
+      final verifier = await api.readTempVerifier() ?? '';
 
-      await api.exchangeCodeForToken(
-        code,
-        verifier,
-      );
+      await api.exchangeCodeForToken(code, verifier);
 
       return Response.ok(
         '''
+<!DOCTYPE html>
 <html>
 <head>
 <title>Connected</title>
+
+<meta http-equiv="refresh" content="5;url=http://localhost:55871">
+
+<script>
+setTimeout(() => {
+  window.open('', '_self');
+  window.close();
+}, 5000);
+</script>
+
+<style>
+body{
+font-family:Arial;
+text-align:center;
+padding-top:100px;
+}
+</style>
 </head>
+
 <body>
-<h2>Upstox Connected Successfully</h2>
-<p>You can return to the app.</p>
+<h2>Upstox Connected Successfully ✅</h2>
+<p>Redirecting back to app in 5 seconds...</p>
 </body>
 </html>
 ''',
-        headers: {
-          'Content-Type': 'text/html',
-        },
+        headers: {'Content-Type': 'text/html'},
       );
     } catch (e) {
       return Response.internalServerError(
@@ -116,38 +129,95 @@ Future<void> main() async {
   });
 
   // =========================================
+  // AUTH STATUS
+  // =========================================
+  app.get('/auth/status', (Request req) async {
+    try {
+      final token = await api.getAccessToken();
+
+      if (token.isNotEmpty) {
+        return Response.ok(
+          jsonEncode({"connected": true}),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
+    } catch (_) {}
+
+    return Response.ok(
+      jsonEncode({"connected": false}),
+      headers: {'Content-Type': 'application/json'},
+    );
+  });
+
+  // =========================================
   // SEARCH INSTRUMENTS
   // =========================================
   app.get('/instruments/search', (Request req) async {
     try {
       final q =
-          req.url.queryParameters['q'] ?? '';
+      (req.url.queryParameters['q'] ?? '').toLowerCase();
 
-      final all =
-      await api.fetchInstruments();
+      // DEMO STATIC DATA
+      final data = [
+        {
+          "key": "NSE_EQ|RELIANCE",
+          "symbol": "RELIANCE",
+          "name": "Reliance Industries"
+        },
+        {
+          "key": "NSE_EQ|TCS",
+          "symbol": "TCS",
+          "name": "Tata Consultancy Services"
+        },
+        {
+          "key": "NSE_EQ|INFY",
+          "symbol": "INFY",
+          "name": "Infosys"
+        },
+        {
+          "key": "NSE_EQ|HDFCBANK",
+          "symbol": "HDFCBANK",
+          "name": "HDFC Bank"
+        },
+        {
+          "key": "NSE_EQ|ICICIBANK",
+          "symbol": "ICICIBANK",
+          "name": "ICICI Bank"
+        },
+        {
+          "key": "NSE_EQ|SBIN",
+          "symbol": "SBIN",
+          "name": "State Bank of India"
+        },
+        {
+          "key": "NSE_EQ|ITC",
+          "symbol": "ITC",
+          "name": "ITC Ltd"
+        },
+        {
+          "key": "NSE_EQ|LT",
+          "symbol": "LT",
+          "name": "Larsen & Toubro"
+        }
+      ];
 
-      final result = all.where((item) {
+      final result = data.where((item) {
         final symbol =
-        (item['symbol'] ?? '')
-            .toString()
-            .toLowerCase();
+        item["symbol"].toString().toLowerCase();
 
-        return symbol.contains(
-          q.toLowerCase(),
-        );
-      }).take(50).toList();
+        final name =
+        item["name"].toString().toLowerCase();
+
+        return symbol.contains(q) || name.contains(q);
+      }).toList();
 
       return Response.ok(
-        result.toString(),
-        headers: {
-          'Content-Type':
-          'application/json'
-        },
+        jsonEncode(result),
+        headers: {'Content-Type': 'application/json'},
       );
     } catch (e) {
       return Response.internalServerError(
-        body:
-        'Search Failed: $e',
+        body: 'Search Failed: $e',
       );
     }
   });
@@ -157,71 +227,109 @@ Future<void> main() async {
   // =========================================
   app.get('/clusters', (Request req) {
     return Response.ok(
-      '[]',
-      headers: {
-        'Content-Type':
-        'application/json'
-      },
+      jsonEncode([
+        {
+          "cluster": "Banking",
+          "strength": "High",
+          "stocks": [
+            "HDFCBANK",
+            "ICICIBANK",
+            "SBIN",
+            "AXISBANK",
+            "KOTAKBANK"
+          ]
+        },
+        {
+          "cluster": "IT",
+          "strength": "Medium",
+          "stocks": [
+            "TCS",
+            "INFY",
+            "WIPRO",
+            "HCLTECH",
+            "TECHM"
+          ]
+        },
+        {
+          "cluster": "Energy",
+          "strength": "High",
+          "stocks": [
+            "RELIANCE",
+            "ONGC",
+            "IOC",
+            "BPCL",
+            "GAIL"
+          ]
+        },
+        {
+          "cluster": "Auto",
+          "strength": "Medium",
+          "stocks": [
+            "TATAMOTORS",
+            "MARUTI",
+            "M&M",
+            "BAJAJ-AUTO",
+            "HEROMOTOCO"
+          ]
+        },
+        {
+          "cluster": "Pharma",
+          "strength": "Low",
+          "stocks": [
+            "SUNPHARMA",
+            "DRREDDY",
+            "CIPLA",
+            "LUPIN",
+            "AUROPHARMA"
+          ]
+        }
+      ]),
+      headers: {'Content-Type': 'application/json'},
     );
   });
 
   // =========================================
   // PREDICTION
   // =========================================
-  app.get('/predict/<key>',
-          (Request req, String key) {
-        return Response.ok(
-          '''
-{
- "key":"$key",
- "prediction":1.85,
- "trend":"UP"
-}
-''',
-          headers: {
-            'Content-Type':
-            'application/json'
-          },
-        );
-      });
+  app.get('/predict/<key>', (Request req, String key) {
+    return Response.ok(
+      jsonEncode({
+        "key": key,
+        "prediction": 1.85,
+        "trend": "UP",
+        "confidence": 87
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+  });
 
   // =========================================
-  // LIVE
+  // LIVE PRICE
   // =========================================
-  app.get('/live/<key>',
-          (Request req, String key) {
-        return Response.ok(
-          '''
-{
- "key":"$key",
- "ltp":1250.45
-}
-''',
-          headers: {
-            'Content-Type':
-            'application/json'
-          },
-        );
-      });
+  app.get('/live/<key>', (Request req, String key) {
+    return Response.ok(
+      jsonEncode({
+        "key": key,
+        "ltp": 1250.45,
+        "change": 12.30,
+        "changePercent": 0.98
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+  });
 
   // -----------------------------------------
   // PIPELINE
   // -----------------------------------------
-  final handler =
-  const Pipeline()
-      .addMiddleware(
-    logRequests(),
-  )
-      .addMiddleware(
-    corsHeaders(),
-  )
+  final handler = const Pipeline()
+      .addMiddleware(logRequests())
+      .addMiddleware(corsHeaders())
       .addHandler(app);
 
   // -----------------------------------------
   // START SERVER
   // -----------------------------------------
-  final server =
-  await io.serve(
+  final server = await io.serve(
     handler,
     InternetAddress.anyIPv4,
     Config.port,
