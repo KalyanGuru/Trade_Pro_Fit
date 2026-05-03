@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
-import 'package:drift/drift.dart';
 import 'package:drift/drift.dart' show Variable;
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -10,20 +9,25 @@ import 'db.dart';
 Handler ltpHandler(AppDb db) {
   return webSocketHandler((WebSocketChannel ch) async {
     final subs = <String>{};
-    final subCtrl = StreamController<void>();
+    Timer? timer;
+
     ch.stream.listen((msg) {
       // Expect {"subscribe":["instrument_key", ...]}
       try {
         final m = jsonDecode(msg as String) as Map<String, dynamic>;
-        final arr = (m['subscribe'] as List?)?.cast<String>() ?? const <String>[];
+        if (!m.containsKey('subscribe')) return;
+
+        final arr =
+            (m['subscribe'] as List?)?.cast<String>() ?? const <String>[];
         subs
           ..clear()
           ..addAll(arr);
-        subCtrl.add(null);
       } catch (_) {}
+    }, onDone: () {
+      timer?.cancel();
     });
 
-    Timer.periodic(const Duration(seconds: 1), (_) async {
+    timer = Timer.periodic(const Duration(seconds: 1), (_) async {
       if (subs.isEmpty) return;
       final out = <Map<String, dynamic>>[];
       for (final k in subs) {
@@ -34,7 +38,11 @@ Handler ltpHandler(AppDb db) {
         );
         final row = await q.getSingleOrNull();
         if (row != null) {
-          out.add({'instrument_key': k, 'ts': row.data['ts'], 'ltp': row.data['close']});
+          out.add({
+            'instrument_key': k,
+            'ts': row.data['ts'],
+            'ltp': row.data['close']
+          });
         }
       }
       ch.sink.add(jsonEncode({'ticks': out}));

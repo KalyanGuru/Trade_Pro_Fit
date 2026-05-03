@@ -8,9 +8,10 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 
-import '../lib/config.dart';
-import '../lib/db.dart';
-import '../lib/upstox.dart';
+import 'package:tread_pro_fit_server/config.dart';
+import 'package:tread_pro_fit_server/db.dart';
+import 'package:tread_pro_fit_server/upstox.dart';
+import 'package:tread_pro_fit_server/ws.dart';
 
 Future<void> main() async {
   // -----------------------------------------
@@ -95,8 +96,6 @@ Future<void> main() async {
 <head>
 <title>Connected</title>
 
-<meta http-equiv="refresh" content="5;url=http://localhost:55871">
-
 <script>
 setTimeout(() => {
   window.open('', '_self');
@@ -114,8 +113,8 @@ padding-top:100px;
 </head>
 
 <body>
-<h2>Upstox Connected Successfully ✅</h2>
-<p>Redirecting back to app in 5 seconds...</p>
+<h2>Upstox Connected Successfully</h2>
+<p>You can return to the Trade Pro Fit app tab now.</p>
 </body>
 </html>
 ''',
@@ -132,16 +131,19 @@ padding-top:100px;
   // AUTH STATUS
   // =========================================
   app.get('/auth/status', (Request req) async {
-    try {
-      final token = await api.getAccessToken();
+    final connected = await api.hasValidAccessToken();
 
-      if (token.isNotEmpty) {
-        return Response.ok(
-          jsonEncode({"connected": true}),
-          headers: {'Content-Type': 'application/json'},
-        );
-      }
-    } catch (_) {}
+    return Response.ok(
+      jsonEncode({"connected": connected}),
+      headers: {'Content-Type': 'application/json'},
+    );
+  });
+
+  // =========================================
+  // LOGOUT / RESET AUTH
+  // =========================================
+  app.post('/auth/logout', (Request req) async {
+    await api.clearTokens();
 
     return Response.ok(
       jsonEncode({"connected": false}),
@@ -154,59 +156,14 @@ padding-top:100px;
   // =========================================
   app.get('/instruments/search', (Request req) async {
     try {
-      final q =
-      (req.url.queryParameters['q'] ?? '').toLowerCase();
-
+      final q = (req.url.queryParameters['q'] ?? '').toLowerCase();
       // DEMO STATIC DATA
-      final data = [
-        {
-          "key": "NSE_EQ|RELIANCE",
-          "symbol": "RELIANCE",
-          "name": "Reliance Industries"
-        },
-        {
-          "key": "NSE_EQ|TCS",
-          "symbol": "TCS",
-          "name": "Tata Consultancy Services"
-        },
-        {
-          "key": "NSE_EQ|INFY",
-          "symbol": "INFY",
-          "name": "Infosys"
-        },
-        {
-          "key": "NSE_EQ|HDFCBANK",
-          "symbol": "HDFCBANK",
-          "name": "HDFC Bank"
-        },
-        {
-          "key": "NSE_EQ|ICICIBANK",
-          "symbol": "ICICIBANK",
-          "name": "ICICI Bank"
-        },
-        {
-          "key": "NSE_EQ|SBIN",
-          "symbol": "SBIN",
-          "name": "State Bank of India"
-        },
-        {
-          "key": "NSE_EQ|ITC",
-          "symbol": "ITC",
-          "name": "ITC Ltd"
-        },
-        {
-          "key": "NSE_EQ|LT",
-          "symbol": "LT",
-          "name": "Larsen & Toubro"
-        }
-      ];
+      final data = await api.fetchInstruments();
 
       final result = data.where((item) {
-        final symbol =
-        item["symbol"].toString().toLowerCase();
+        final symbol = item["symbol"].toString().toLowerCase();
 
-        final name =
-        item["name"].toString().toLowerCase();
+        final name = item["name"].toString().toLowerCase();
 
         return symbol.contains(q) || name.contains(q);
       }).toList();
@@ -231,57 +188,27 @@ padding-top:100px;
         {
           "cluster": "Banking",
           "strength": "High",
-          "stocks": [
-            "HDFCBANK",
-            "ICICIBANK",
-            "SBIN",
-            "AXISBANK",
-            "KOTAKBANK"
-          ]
+          "stocks": ["HDFCBANK", "ICICIBANK", "SBIN", "AXISBANK", "KOTAKBANK"]
         },
         {
           "cluster": "IT",
           "strength": "Medium",
-          "stocks": [
-            "TCS",
-            "INFY",
-            "WIPRO",
-            "HCLTECH",
-            "TECHM"
-          ]
+          "stocks": ["TCS", "INFY", "WIPRO", "HCLTECH", "TECHM"]
         },
         {
           "cluster": "Energy",
           "strength": "High",
-          "stocks": [
-            "RELIANCE",
-            "ONGC",
-            "IOC",
-            "BPCL",
-            "GAIL"
-          ]
+          "stocks": ["RELIANCE", "ONGC", "IOC", "BPCL", "GAIL"]
         },
         {
           "cluster": "Auto",
           "strength": "Medium",
-          "stocks": [
-            "TATAMOTORS",
-            "MARUTI",
-            "M&M",
-            "BAJAJ-AUTO",
-            "HEROMOTOCO"
-          ]
+          "stocks": ["TATAMOTORS", "MARUTI", "M&M", "BAJAJ-AUTO", "HEROMOTOCO"]
         },
         {
           "cluster": "Pharma",
           "strength": "Low",
-          "stocks": [
-            "SUNPHARMA",
-            "DRREDDY",
-            "CIPLA",
-            "LUPIN",
-            "AUROPHARMA"
-          ]
+          "stocks": ["SUNPHARMA", "DRREDDY", "CIPLA", "LUPIN", "AUROPHARMA"]
         }
       ]),
       headers: {'Content-Type': 'application/json'},
@@ -293,12 +220,8 @@ padding-top:100px;
   // =========================================
   app.get('/predict/<key>', (Request req, String key) {
     return Response.ok(
-      jsonEncode({
-        "key": key,
-        "prediction": 1.85,
-        "trend": "UP",
-        "confidence": 87
-      }),
+      jsonEncode(
+          {"key": key, "prediction": 1.85, "trend": "UP", "confidence": 87}),
       headers: {'Content-Type': 'application/json'},
     );
   });
@@ -306,17 +229,34 @@ padding-top:100px;
   // =========================================
   // LIVE PRICE
   // =========================================
-  app.get('/live/<key>', (Request req, String key) {
+  app.get('/live/<key>', (Request req, String key) async {
+    final live = await api.fetchLivePrice(key);
+
     return Response.ok(
-      jsonEncode({
-        "key": key,
-        "ltp": 1250.45,
-        "change": 12.30,
-        "changePercent": 0.98
-      }),
+      jsonEncode(live),
       headers: {'Content-Type': 'application/json'},
     );
   });
+
+  // =========================================
+  // OHLC CANDLES
+  // =========================================
+  app.get('/candles/<key>', (Request req, String key) async {
+    final candles = await api.fetchMinuteOHLC(
+      instrumentKey: key,
+    );
+
+    return Response.ok(
+      jsonEncode(candles),
+      headers: {'Content-Type': 'application/json'},
+    );
+  });
+
+  // =========================================
+  // LIVE PRICE WEBSOCKET
+  // =========================================
+  final ltpWsHandler = ltpHandler(db);
+  app.get('/ws/ltp', (Request request) => ltpWsHandler.call(request));
 
   // -----------------------------------------
   // PIPELINE
@@ -324,7 +264,7 @@ padding-top:100px;
   final handler = const Pipeline()
       .addMiddleware(logRequests())
       .addMiddleware(corsHeaders())
-      .addHandler(app);
+      .addHandler(app.call);
 
   // -----------------------------------------
   // START SERVER
@@ -335,7 +275,7 @@ padding-top:100px;
     Config.port,
   );
 
-  print(
+  stdout.writeln(
     'Backend Running on http://${server.address.host}:${server.port}',
   );
 }

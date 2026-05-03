@@ -12,9 +12,11 @@ dependencies:
   shelf_router: ^1.1.4
   shelf_cors_headers: ^0.1.5
   shelf_web_socket: ^1.0.4
+  web_socket_channel: ^2.4.0
   http: ^1.2.2
   dotenv: ^4.2.0
   ml_algo: ^16.14.0
+  ml_dataframe: ^1.6.0
   ml_linalg: ^13.12.6
   collection: ^1.18.0
   crypto: ^3.0.7

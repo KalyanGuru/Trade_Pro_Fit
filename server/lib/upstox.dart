@@ -23,14 +23,11 @@ class UpstoxApi {
     final randomBytes =
     List<int>.generate(40, (_) => Random.secure().nextInt(256));
 
-    final verifier =
-    base64UrlEncode(randomBytes).replaceAll('=', '');
+    final verifier = base64UrlEncode(randomBytes).replaceAll('=', '');
 
-    final digest =
-    sha256.convert(utf8.encode(verifier));
+    final digest = sha256.convert(utf8.encode(verifier));
 
-    final challenge =
-    base64UrlEncode(digest.bytes).replaceAll('=', '');
+    final challenge = base64UrlEncode(digest.bytes).replaceAll('=', '');
 
     return {
       'verifier': verifier,
@@ -109,23 +106,17 @@ class UpstoxApi {
       );
     }
 
-    final json =
-    jsonDecode(response.body) as Map<String, dynamic>;
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
 
-    final expiresIn =
-        (json['expires_in'] as num?)?.toInt() ?? 3600;
+    final expiresIn = (json['expires_in'] as num?)?.toInt() ?? 3600;
 
-    final expiry =
-        DateTime.now().millisecondsSinceEpoch ~/ 1000 +
-            expiresIn;
+    final expiry = DateTime.now().millisecondsSinceEpoch ~/ 1000 + expiresIn;
 
     await db.into(db.tokens).insertOnConflictUpdate(
       TokensCompanion.insert(
         id: const d.Value(1),
-        accessToken:
-        d.Value(json['access_token'] as String?),
-        refreshToken:
-        d.Value(json['refresh_token'] as String?),
+        accessToken: d.Value(json['access_token'] as String?),
+        refreshToken: d.Value(json['refresh_token'] as String?),
         expiresAt: d.Value(expiry),
       ),
     );
@@ -135,18 +126,46 @@ class UpstoxApi {
   // GET TOKEN
   // =====================================================
 
-  Future<String> getAccessToken() async {
-    final row = await (db.select(db.tokens)
-      ..where((tbl) => tbl.id.equals(1)))
+  Future<Token?> _readTokenRow() async {
+    return (db.select(db.tokens)..where((tbl) => tbl.id.equals(1)))
         .getSingleOrNull();
+  }
 
-    if (row?.accessToken == null) {
+  Future<bool> hasValidAccessToken() async {
+    final row = await _readTokenRow();
+    final token = row?.accessToken;
+    final expiresAt = row?.expiresAt;
+
+    if (token == null || token.isEmpty || expiresAt == null) {
+      return false;
+    }
+
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final isExpired = expiresAt <= now + 60;
+
+    if (isExpired) {
+      await clearTokens();
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<String> getAccessToken() async {
+    final row = await _readTokenRow();
+
+    if (row?.accessToken == null || !await hasValidAccessToken()) {
       throw Exception(
         'No access token found. Login first.',
       );
     }
 
     return row!.accessToken!;
+  }
+
+  Future<void> clearTokens() async {
+    await (db.delete(db.tokens)..where((tbl) => tbl.id.equals(1))).go();
+    await (db.delete(db.tokens)..where((tbl) => tbl.id.equals(9999))).go();
   }
 
   // =====================================================
@@ -196,36 +215,12 @@ class UpstoxApi {
         "symbol": "TCS",
         "name": "Tata Consultancy Services"
       },
-      {
-        "key": "NSE_EQ|INFY",
-        "symbol": "INFY",
-        "name": "Infosys"
-      },
-      {
-        "key": "NSE_EQ|HDFCBANK",
-        "symbol": "HDFCBANK",
-        "name": "HDFC Bank"
-      },
-      {
-        "key": "NSE_EQ|ICICIBANK",
-        "symbol": "ICICIBANK",
-        "name": "ICICI Bank"
-      },
-      {
-        "key": "NSE_EQ|SBIN",
-        "symbol": "SBIN",
-        "name": "State Bank of India"
-      },
-      {
-        "key": "NSE_EQ|ITC",
-        "symbol": "ITC",
-        "name": "ITC Ltd"
-      },
-      {
-        "key": "NSE_EQ|LT",
-        "symbol": "LT",
-        "name": "Larsen & Toubro"
-      }
+      {"key": "NSE_EQ|INFY", "symbol": "INFY", "name": "Infosys"},
+      {"key": "NSE_EQ|HDFCBANK", "symbol": "HDFCBANK", "name": "HDFC Bank"},
+      {"key": "NSE_EQ|ICICIBANK", "symbol": "ICICIBANK", "name": "ICICI Bank"},
+      {"key": "NSE_EQ|SBIN", "symbol": "SBIN", "name": "State Bank of India"},
+      {"key": "NSE_EQ|ITC", "symbol": "ITC", "name": "ITC Ltd"},
+      {"key": "NSE_EQ|LT", "symbol": "LT", "name": "Larsen & Toubro"}
     ];
   }
 

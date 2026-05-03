@@ -2,7 +2,7 @@ class Instrument {
   final String key;
   final String symbol;
   final String name;
-
+                  
   Instrument({
     required this.key,
     required this.symbol,

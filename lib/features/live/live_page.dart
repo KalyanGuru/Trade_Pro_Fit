@@ -47,24 +47,16 @@ class _LivePageState extends State<LivePage> {
     if (picked == null) return;
 
     try {
-      final live =
-      await api.getLivePrice(picked!.key);
+      final live = await api.getLivePrice(picked!.key);
 
-      final pred =
-      await api.getPrediction(picked!.key);
+      final pred = await api.getPrediction(picked!.key);
 
       setState(() {
-        ltp =
-            (live['ltp'] as num)
-                .toDouble();
+        ltp = (live['ltp'] as num).toDouble();
 
-        trend =
-            pred['trend']
-                ?.toString() ??
-                '-';
+        trend = pred['trend']?.toString() ?? '-';
 
-        confidence =
-            pred['confidence'] ?? 0;
+        confidence = pred['confidence'] ?? 0;
 
         priceHistory.add(ltp);
 
@@ -87,46 +79,34 @@ class _LivePageState extends State<LivePage> {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding:
-      const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       children: [
         Row(
-          mainAxisAlignment:
-          MainAxisAlignment
-              .spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              picked?.symbol ??
-                  'Pick Stock',
+              picked?.symbol ?? 'Pick Stock',
               style: const TextStyle(
                 fontSize: 24,
-                fontWeight:
-                FontWeight.bold,
+                fontWeight: FontWeight.bold,
               ),
             ),
-
             ElevatedButton(
               onPressed: () async {
                 await showDialog(
                   context: context,
                   builder: (_) {
                     return AlertDialog(
-                      content:
-                      SizedBox(
+                      content: SizedBox(
                         width: 450,
-                        child:
-                        SearchPage(
-                          onPick:
-                              (ins) {
+                        child: SearchPage(
+                          onPick: (ins) {
                             setState(() {
-                              picked =
-                                  ins;
-                              priceHistory
-                                  .clear();
+                              picked = ins;
+                              priceHistory.clear();
                             });
 
-                            Navigator.pop(
-                                context);
+                            Navigator.pop(context);
 
                             startLive();
                           },
@@ -136,159 +116,104 @@ class _LivePageState extends State<LivePage> {
                   },
                 );
               },
-              child:
-              const Text(
-                  "Search"),
+              child: const Text("Search"),
             ),
           ],
         ),
-
         const SizedBox(height: 20),
-
         if (picked != null) ...[
           Card(
             elevation: 5,
             child: Padding(
-              padding:
-              const EdgeInsets.all(
-                  16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   Text(
                     "Live Price",
-                    style:
-                    TextStyle(
-                      fontSize:
-                      18,
-                      color: Colors
-                          .grey[700],
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[700],
                     ),
                   ),
-
-                  const SizedBox(
-                      height: 10),
-
+                  const SizedBox(height: 10),
                   Text(
-                    "₹ ${ltp.toStringAsFixed(2)}",
-                    style:
-                    const TextStyle(
-                      fontSize:
-                      32,
-                      fontWeight:
-                      FontWeight.bold,
-                      color:
-                      Colors.green,
+                    "Rs ${ltp.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-
           const SizedBox(height: 15),
-
           Card(
             elevation: 5,
             child: Padding(
-              padding:
-              const EdgeInsets.all(
-                  16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   const Text(
                     "Next 1 Hour Prediction",
-                    style:
-                    TextStyle(
-                      fontSize:
-                      18,
+                    style: TextStyle(
+                      fontSize: 18,
                     ),
                   ),
-
-                  const SizedBox(
-                      height: 12),
-
+                  const SizedBox(height: 12),
                   Text(
                     trend,
-                    style:
-                    TextStyle(
-                      fontSize:
-                      28,
-                      fontWeight:
-                      FontWeight.bold,
-                      color: trend ==
-                          "UP"
-                          ? Colors.green
-                          : Colors.red,
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: trend == "UP" ? Colors.green : Colors.red,
                     ),
                   ),
-
-                  const SizedBox(
-                      height: 8),
-
+                  const SizedBox(height: 8),
                   Text(
                     "Confidence: $confidence%",
-                    style:
-                    const TextStyle(
-                      fontSize:
-                      16,
+                    style: const TextStyle(
+                      fontSize: 16,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-
           const SizedBox(height: 15),
-
           Card(
             child: Padding(
-              padding:
-              const EdgeInsets.all(
-                  16),
+              padding: const EdgeInsets.all(16),
               child: Column(
-                crossAxisAlignment:
-                CrossAxisAlignment
-                    .start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     "Recent Prices",
-                    style:
-                    TextStyle(
-                      fontSize:
-                      18,
+                    style: TextStyle(
+                      fontSize: 18,
                     ),
                   ),
-                  const SizedBox(
-                      height: 10),
-
+                  const SizedBox(height: 10),
                   Text(
-                    priceHistory
-                        .map((e) => e
-                        .toStringAsFixed(
-                        1))
-                        .join(
-                        "  |  "),
+                    priceHistory.map((e) => e.toStringAsFixed(1)).join("  |  "),
                   ),
                 ],
               ),
             ),
           ),
         ],
-
         const SizedBox(height: 20),
-
         OutlinedButton(
           onPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                const AuthPage(),
+                builder: (_) => const AuthPage(),
               ),
             );
           },
-          child: const Text(
-              "Connect Upstox"),
+          child: const Text("Connect Upstox"),
         ),
       ],
     );

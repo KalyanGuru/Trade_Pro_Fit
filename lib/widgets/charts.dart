@@ -16,13 +16,13 @@ class LineChartSimple extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: Theme.of(context).textTheme.titleMedium),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         SizedBox(
           height: 220,
           child: LineChart(LineChartData(
             lineBarsData: [LineChartBarData(spots: spots, isCurved: true)],
-            titlesData: FlTitlesData(show: false),
-            gridData: FlGridData(show: false),
+            titlesData: const FlTitlesData(show: false),
+            gridData: const FlGridData(show: false),
             borderData: FlBorderData(show: true),
           )),
         ),

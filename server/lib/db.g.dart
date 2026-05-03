@@ -1498,92 +1498,22 @@ typedef $$TokensTableUpdateCompanionBuilder = TokensCompanion Function({
   Value<int?> expiresAt,
 });
 
-class $$TokensTableFilterComposer extends Composer<_$AppDb, $TokensTable> {
-  $$TokensTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get accessToken => $composableBuilder(
-      column: $table.accessToken, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get refreshToken => $composableBuilder(
-      column: $table.refreshToken, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get expiresAt => $composableBuilder(
-      column: $table.expiresAt, builder: (column) => ColumnFilters(column));
-}
-
-class $$TokensTableOrderingComposer extends Composer<_$AppDb, $TokensTable> {
-  $$TokensTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get accessToken => $composableBuilder(
-      column: $table.accessToken, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get refreshToken => $composableBuilder(
-      column: $table.refreshToken,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get expiresAt => $composableBuilder(
-      column: $table.expiresAt, builder: (column) => ColumnOrderings(column));
-}
-
-class $$TokensTableAnnotationComposer extends Composer<_$AppDb, $TokensTable> {
-  $$TokensTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get accessToken => $composableBuilder(
-      column: $table.accessToken, builder: (column) => column);
-
-  GeneratedColumn<String> get refreshToken => $composableBuilder(
-      column: $table.refreshToken, builder: (column) => column);
-
-  GeneratedColumn<int> get expiresAt =>
-      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
-}
-
 class $$TokensTableTableManager extends RootTableManager<
     _$AppDb,
     $TokensTable,
     Token,
     $$TokensTableFilterComposer,
     $$TokensTableOrderingComposer,
-    $$TokensTableAnnotationComposer,
     $$TokensTableCreateCompanionBuilder,
-    $$TokensTableUpdateCompanionBuilder,
-    (Token, BaseReferences<_$AppDb, $TokensTable, Token>),
-    Token,
-    PrefetchHooks Function()> {
+    $$TokensTableUpdateCompanionBuilder> {
   $$TokensTableTableManager(_$AppDb db, $TokensTable table)
       : super(TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$TokensTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$TokensTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$TokensTableAnnotationComposer($db: db, $table: table),
+          filteringComposer:
+              $$TokensTableFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $$TokensTableOrderingComposer(ComposerState(db, table)),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String?> accessToken = const Value.absent(),
@@ -1608,25 +1538,57 @@ class $$TokensTableTableManager extends RootTableManager<
             refreshToken: refreshToken,
             expiresAt: expiresAt,
           ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
         ));
 }
 
-typedef $$TokensTableProcessedTableManager = ProcessedTableManager<
-    _$AppDb,
-    $TokensTable,
-    Token,
-    $$TokensTableFilterComposer,
-    $$TokensTableOrderingComposer,
-    $$TokensTableAnnotationComposer,
-    $$TokensTableCreateCompanionBuilder,
-    $$TokensTableUpdateCompanionBuilder,
-    (Token, BaseReferences<_$AppDb, $TokensTable, Token>),
-    Token,
-    PrefetchHooks Function()>;
+class $$TokensTableFilterComposer
+    extends FilterComposer<_$AppDb, $TokensTable> {
+  $$TokensTableFilterComposer(super.$state);
+  ColumnFilters<int> get id => $state.composableBuilder(
+      column: $state.table.id,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get accessToken => $state.composableBuilder(
+      column: $state.table.accessToken,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get refreshToken => $state.composableBuilder(
+      column: $state.table.refreshToken,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get expiresAt => $state.composableBuilder(
+      column: $state.table.expiresAt,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $$TokensTableOrderingComposer
+    extends OrderingComposer<_$AppDb, $TokensTable> {
+  $$TokensTableOrderingComposer(super.$state);
+  ColumnOrderings<int> get id => $state.composableBuilder(
+      column: $state.table.id,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get accessToken => $state.composableBuilder(
+      column: $state.table.accessToken,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get refreshToken => $state.composableBuilder(
+      column: $state.table.refreshToken,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get expiresAt => $state.composableBuilder(
+      column: $state.table.expiresAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
 typedef $$InstrumentsTableCreateCompanionBuilder = InstrumentsCompanion
     Function({
   required String instrumentKey,
@@ -1642,86 +1604,22 @@ typedef $$InstrumentsTableUpdateCompanionBuilder = InstrumentsCompanion
   Value<int> rowid,
 });
 
-class $$InstrumentsTableFilterComposer
-    extends Composer<_$AppDb, $InstrumentsTable> {
-  $$InstrumentsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get instrumentKey => $composableBuilder(
-      column: $table.instrumentKey, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get symbol => $composableBuilder(
-      column: $table.symbol, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnFilters(column));
-}
-
-class $$InstrumentsTableOrderingComposer
-    extends Composer<_$AppDb, $InstrumentsTable> {
-  $$InstrumentsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get instrumentKey => $composableBuilder(
-      column: $table.instrumentKey,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get symbol => $composableBuilder(
-      column: $table.symbol, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnOrderings(column));
-}
-
-class $$InstrumentsTableAnnotationComposer
-    extends Composer<_$AppDb, $InstrumentsTable> {
-  $$InstrumentsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get instrumentKey => $composableBuilder(
-      column: $table.instrumentKey, builder: (column) => column);
-
-  GeneratedColumn<String> get symbol =>
-      $composableBuilder(column: $table.symbol, builder: (column) => column);
-
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
-}
-
 class $$InstrumentsTableTableManager extends RootTableManager<
     _$AppDb,
     $InstrumentsTable,
     Instrument,
     $$InstrumentsTableFilterComposer,
     $$InstrumentsTableOrderingComposer,
-    $$InstrumentsTableAnnotationComposer,
     $$InstrumentsTableCreateCompanionBuilder,
-    $$InstrumentsTableUpdateCompanionBuilder,
-    (Instrument, BaseReferences<_$AppDb, $InstrumentsTable, Instrument>),
-    Instrument,
-    PrefetchHooks Function()> {
+    $$InstrumentsTableUpdateCompanionBuilder> {
   $$InstrumentsTableTableManager(_$AppDb db, $InstrumentsTable table)
       : super(TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$InstrumentsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$InstrumentsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$InstrumentsTableAnnotationComposer($db: db, $table: table),
+          filteringComposer:
+              $$InstrumentsTableFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $$InstrumentsTableOrderingComposer(ComposerState(db, table)),
           updateCompanionCallback: ({
             Value<String> instrumentKey = const Value.absent(),
             Value<String> symbol = const Value.absent(),
@@ -1746,25 +1644,47 @@ class $$InstrumentsTableTableManager extends RootTableManager<
             name: name,
             rowid: rowid,
           ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
         ));
 }
 
-typedef $$InstrumentsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDb,
-    $InstrumentsTable,
-    Instrument,
-    $$InstrumentsTableFilterComposer,
-    $$InstrumentsTableOrderingComposer,
-    $$InstrumentsTableAnnotationComposer,
-    $$InstrumentsTableCreateCompanionBuilder,
-    $$InstrumentsTableUpdateCompanionBuilder,
-    (Instrument, BaseReferences<_$AppDb, $InstrumentsTable, Instrument>),
-    Instrument,
-    PrefetchHooks Function()>;
+class $$InstrumentsTableFilterComposer
+    extends FilterComposer<_$AppDb, $InstrumentsTable> {
+  $$InstrumentsTableFilterComposer(super.$state);
+  ColumnFilters<String> get instrumentKey => $state.composableBuilder(
+      column: $state.table.instrumentKey,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get symbol => $state.composableBuilder(
+      column: $state.table.symbol,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $$InstrumentsTableOrderingComposer
+    extends OrderingComposer<_$AppDb, $InstrumentsTable> {
+  $$InstrumentsTableOrderingComposer(super.$state);
+  ColumnOrderings<String> get instrumentKey => $state.composableBuilder(
+      column: $state.table.instrumentKey,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get symbol => $state.composableBuilder(
+      column: $state.table.symbol,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
 typedef $$MinuteBarsTableCreateCompanionBuilder = MinuteBarsCompanion Function({
   required String instrumentKey,
   required int ts,
@@ -1786,122 +1706,22 @@ typedef $$MinuteBarsTableUpdateCompanionBuilder = MinuteBarsCompanion Function({
   Value<int> rowid,
 });
 
-class $$MinuteBarsTableFilterComposer
-    extends Composer<_$AppDb, $MinuteBarsTable> {
-  $$MinuteBarsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get instrumentKey => $composableBuilder(
-      column: $table.instrumentKey, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get ts => $composableBuilder(
-      column: $table.ts, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<double> get open => $composableBuilder(
-      column: $table.open, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<double> get high => $composableBuilder(
-      column: $table.high, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<double> get low => $composableBuilder(
-      column: $table.low, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<double> get close => $composableBuilder(
-      column: $table.close, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<double> get volume => $composableBuilder(
-      column: $table.volume, builder: (column) => ColumnFilters(column));
-}
-
-class $$MinuteBarsTableOrderingComposer
-    extends Composer<_$AppDb, $MinuteBarsTable> {
-  $$MinuteBarsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get instrumentKey => $composableBuilder(
-      column: $table.instrumentKey,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get ts => $composableBuilder(
-      column: $table.ts, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<double> get open => $composableBuilder(
-      column: $table.open, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<double> get high => $composableBuilder(
-      column: $table.high, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<double> get low => $composableBuilder(
-      column: $table.low, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<double> get close => $composableBuilder(
-      column: $table.close, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<double> get volume => $composableBuilder(
-      column: $table.volume, builder: (column) => ColumnOrderings(column));
-}
-
-class $$MinuteBarsTableAnnotationComposer
-    extends Composer<_$AppDb, $MinuteBarsTable> {
-  $$MinuteBarsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get instrumentKey => $composableBuilder(
-      column: $table.instrumentKey, builder: (column) => column);
-
-  GeneratedColumn<int> get ts =>
-      $composableBuilder(column: $table.ts, builder: (column) => column);
-
-  GeneratedColumn<double> get open =>
-      $composableBuilder(column: $table.open, builder: (column) => column);
-
-  GeneratedColumn<double> get high =>
-      $composableBuilder(column: $table.high, builder: (column) => column);
-
-  GeneratedColumn<double> get low =>
-      $composableBuilder(column: $table.low, builder: (column) => column);
-
-  GeneratedColumn<double> get close =>
-      $composableBuilder(column: $table.close, builder: (column) => column);
-
-  GeneratedColumn<double> get volume =>
-      $composableBuilder(column: $table.volume, builder: (column) => column);
-}
-
 class $$MinuteBarsTableTableManager extends RootTableManager<
     _$AppDb,
     $MinuteBarsTable,
     MinuteBar,
     $$MinuteBarsTableFilterComposer,
     $$MinuteBarsTableOrderingComposer,
-    $$MinuteBarsTableAnnotationComposer,
     $$MinuteBarsTableCreateCompanionBuilder,
-    $$MinuteBarsTableUpdateCompanionBuilder,
-    (MinuteBar, BaseReferences<_$AppDb, $MinuteBarsTable, MinuteBar>),
-    MinuteBar,
-    PrefetchHooks Function()> {
+    $$MinuteBarsTableUpdateCompanionBuilder> {
   $$MinuteBarsTableTableManager(_$AppDb db, $MinuteBarsTable table)
       : super(TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$MinuteBarsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$MinuteBarsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$MinuteBarsTableAnnotationComposer($db: db, $table: table),
+          filteringComposer:
+              $$MinuteBarsTableFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $$MinuteBarsTableOrderingComposer(ComposerState(db, table)),
           updateCompanionCallback: ({
             Value<String> instrumentKey = const Value.absent(),
             Value<int> ts = const Value.absent(),
@@ -1942,25 +1762,87 @@ class $$MinuteBarsTableTableManager extends RootTableManager<
             volume: volume,
             rowid: rowid,
           ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
         ));
 }
 
-typedef $$MinuteBarsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDb,
-    $MinuteBarsTable,
-    MinuteBar,
-    $$MinuteBarsTableFilterComposer,
-    $$MinuteBarsTableOrderingComposer,
-    $$MinuteBarsTableAnnotationComposer,
-    $$MinuteBarsTableCreateCompanionBuilder,
-    $$MinuteBarsTableUpdateCompanionBuilder,
-    (MinuteBar, BaseReferences<_$AppDb, $MinuteBarsTable, MinuteBar>),
-    MinuteBar,
-    PrefetchHooks Function()>;
+class $$MinuteBarsTableFilterComposer
+    extends FilterComposer<_$AppDb, $MinuteBarsTable> {
+  $$MinuteBarsTableFilterComposer(super.$state);
+  ColumnFilters<String> get instrumentKey => $state.composableBuilder(
+      column: $state.table.instrumentKey,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get ts => $state.composableBuilder(
+      column: $state.table.ts,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get open => $state.composableBuilder(
+      column: $state.table.open,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get high => $state.composableBuilder(
+      column: $state.table.high,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get low => $state.composableBuilder(
+      column: $state.table.low,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get close => $state.composableBuilder(
+      column: $state.table.close,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get volume => $state.composableBuilder(
+      column: $state.table.volume,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $$MinuteBarsTableOrderingComposer
+    extends OrderingComposer<_$AppDb, $MinuteBarsTable> {
+  $$MinuteBarsTableOrderingComposer(super.$state);
+  ColumnOrderings<String> get instrumentKey => $state.composableBuilder(
+      column: $state.table.instrumentKey,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get ts => $state.composableBuilder(
+      column: $state.table.ts,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get open => $state.composableBuilder(
+      column: $state.table.open,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get high => $state.composableBuilder(
+      column: $state.table.high,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get low => $state.composableBuilder(
+      column: $state.table.low,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get close => $state.composableBuilder(
+      column: $state.table.close,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get volume => $state.composableBuilder(
+      column: $state.table.volume,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
 typedef $$PredictionsTableCreateCompanionBuilder = PredictionsCompanion
     Function({
   required String instrumentKey,
@@ -1980,104 +1862,22 @@ typedef $$PredictionsTableUpdateCompanionBuilder = PredictionsCompanion
   Value<int> rowid,
 });
 
-class $$PredictionsTableFilterComposer
-    extends Composer<_$AppDb, $PredictionsTable> {
-  $$PredictionsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get instrumentKey => $composableBuilder(
-      column: $table.instrumentKey, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get ts => $composableBuilder(
-      column: $table.ts, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get horizon => $composableBuilder(
-      column: $table.horizon, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<double> get retPred => $composableBuilder(
-      column: $table.retPred, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get curve => $composableBuilder(
-      column: $table.curve, builder: (column) => ColumnFilters(column));
-}
-
-class $$PredictionsTableOrderingComposer
-    extends Composer<_$AppDb, $PredictionsTable> {
-  $$PredictionsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get instrumentKey => $composableBuilder(
-      column: $table.instrumentKey,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get ts => $composableBuilder(
-      column: $table.ts, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get horizon => $composableBuilder(
-      column: $table.horizon, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<double> get retPred => $composableBuilder(
-      column: $table.retPred, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get curve => $composableBuilder(
-      column: $table.curve, builder: (column) => ColumnOrderings(column));
-}
-
-class $$PredictionsTableAnnotationComposer
-    extends Composer<_$AppDb, $PredictionsTable> {
-  $$PredictionsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get instrumentKey => $composableBuilder(
-      column: $table.instrumentKey, builder: (column) => column);
-
-  GeneratedColumn<int> get ts =>
-      $composableBuilder(column: $table.ts, builder: (column) => column);
-
-  GeneratedColumn<int> get horizon =>
-      $composableBuilder(column: $table.horizon, builder: (column) => column);
-
-  GeneratedColumn<double> get retPred =>
-      $composableBuilder(column: $table.retPred, builder: (column) => column);
-
-  GeneratedColumn<String> get curve =>
-      $composableBuilder(column: $table.curve, builder: (column) => column);
-}
-
 class $$PredictionsTableTableManager extends RootTableManager<
     _$AppDb,
     $PredictionsTable,
     Prediction,
     $$PredictionsTableFilterComposer,
     $$PredictionsTableOrderingComposer,
-    $$PredictionsTableAnnotationComposer,
     $$PredictionsTableCreateCompanionBuilder,
-    $$PredictionsTableUpdateCompanionBuilder,
-    (Prediction, BaseReferences<_$AppDb, $PredictionsTable, Prediction>),
-    Prediction,
-    PrefetchHooks Function()> {
+    $$PredictionsTableUpdateCompanionBuilder> {
   $$PredictionsTableTableManager(_$AppDb db, $PredictionsTable table)
       : super(TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$PredictionsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$PredictionsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$PredictionsTableAnnotationComposer($db: db, $table: table),
+          filteringComposer:
+              $$PredictionsTableFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $$PredictionsTableOrderingComposer(ComposerState(db, table)),
           updateCompanionCallback: ({
             Value<String> instrumentKey = const Value.absent(),
             Value<int> ts = const Value.absent(),
@@ -2110,25 +1910,67 @@ class $$PredictionsTableTableManager extends RootTableManager<
             curve: curve,
             rowid: rowid,
           ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
         ));
 }
 
-typedef $$PredictionsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDb,
-    $PredictionsTable,
-    Prediction,
-    $$PredictionsTableFilterComposer,
-    $$PredictionsTableOrderingComposer,
-    $$PredictionsTableAnnotationComposer,
-    $$PredictionsTableCreateCompanionBuilder,
-    $$PredictionsTableUpdateCompanionBuilder,
-    (Prediction, BaseReferences<_$AppDb, $PredictionsTable, Prediction>),
-    Prediction,
-    PrefetchHooks Function()>;
+class $$PredictionsTableFilterComposer
+    extends FilterComposer<_$AppDb, $PredictionsTable> {
+  $$PredictionsTableFilterComposer(super.$state);
+  ColumnFilters<String> get instrumentKey => $state.composableBuilder(
+      column: $state.table.instrumentKey,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get ts => $state.composableBuilder(
+      column: $state.table.ts,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get horizon => $state.composableBuilder(
+      column: $state.table.horizon,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get retPred => $state.composableBuilder(
+      column: $state.table.retPred,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get curve => $state.composableBuilder(
+      column: $state.table.curve,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $$PredictionsTableOrderingComposer
+    extends OrderingComposer<_$AppDb, $PredictionsTable> {
+  $$PredictionsTableOrderingComposer(super.$state);
+  ColumnOrderings<String> get instrumentKey => $state.composableBuilder(
+      column: $state.table.instrumentKey,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get ts => $state.composableBuilder(
+      column: $state.table.ts,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get horizon => $state.composableBuilder(
+      column: $state.table.horizon,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get retPred => $state.composableBuilder(
+      column: $state.table.retPred,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get curve => $state.composableBuilder(
+      column: $state.table.curve,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
 typedef $$ClustersTableCreateCompanionBuilder = ClustersCompanion Function({
   required int ts,
   required String instrumentKey,
@@ -2144,94 +1986,22 @@ typedef $$ClustersTableUpdateCompanionBuilder = ClustersCompanion Function({
   Value<int> rowid,
 });
 
-class $$ClustersTableFilterComposer extends Composer<_$AppDb, $ClustersTable> {
-  $$ClustersTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get ts => $composableBuilder(
-      column: $table.ts, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get instrumentKey => $composableBuilder(
-      column: $table.instrumentKey, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get cluster => $composableBuilder(
-      column: $table.cluster, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get label => $composableBuilder(
-      column: $table.label, builder: (column) => ColumnFilters(column));
-}
-
-class $$ClustersTableOrderingComposer
-    extends Composer<_$AppDb, $ClustersTable> {
-  $$ClustersTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get ts => $composableBuilder(
-      column: $table.ts, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get instrumentKey => $composableBuilder(
-      column: $table.instrumentKey,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get cluster => $composableBuilder(
-      column: $table.cluster, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get label => $composableBuilder(
-      column: $table.label, builder: (column) => ColumnOrderings(column));
-}
-
-class $$ClustersTableAnnotationComposer
-    extends Composer<_$AppDb, $ClustersTable> {
-  $$ClustersTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get ts =>
-      $composableBuilder(column: $table.ts, builder: (column) => column);
-
-  GeneratedColumn<String> get instrumentKey => $composableBuilder(
-      column: $table.instrumentKey, builder: (column) => column);
-
-  GeneratedColumn<int> get cluster =>
-      $composableBuilder(column: $table.cluster, builder: (column) => column);
-
-  GeneratedColumn<String> get label =>
-      $composableBuilder(column: $table.label, builder: (column) => column);
-}
-
 class $$ClustersTableTableManager extends RootTableManager<
     _$AppDb,
     $ClustersTable,
     Cluster,
     $$ClustersTableFilterComposer,
     $$ClustersTableOrderingComposer,
-    $$ClustersTableAnnotationComposer,
     $$ClustersTableCreateCompanionBuilder,
-    $$ClustersTableUpdateCompanionBuilder,
-    (Cluster, BaseReferences<_$AppDb, $ClustersTable, Cluster>),
-    Cluster,
-    PrefetchHooks Function()> {
+    $$ClustersTableUpdateCompanionBuilder> {
   $$ClustersTableTableManager(_$AppDb db, $ClustersTable table)
       : super(TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$ClustersTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ClustersTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ClustersTableAnnotationComposer($db: db, $table: table),
+          filteringComposer:
+              $$ClustersTableFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $$ClustersTableOrderingComposer(ComposerState(db, table)),
           updateCompanionCallback: ({
             Value<int> ts = const Value.absent(),
             Value<String> instrumentKey = const Value.absent(),
@@ -2260,25 +2030,56 @@ class $$ClustersTableTableManager extends RootTableManager<
             label: label,
             rowid: rowid,
           ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
         ));
 }
 
-typedef $$ClustersTableProcessedTableManager = ProcessedTableManager<
-    _$AppDb,
-    $ClustersTable,
-    Cluster,
-    $$ClustersTableFilterComposer,
-    $$ClustersTableOrderingComposer,
-    $$ClustersTableAnnotationComposer,
-    $$ClustersTableCreateCompanionBuilder,
-    $$ClustersTableUpdateCompanionBuilder,
-    (Cluster, BaseReferences<_$AppDb, $ClustersTable, Cluster>),
-    Cluster,
-    PrefetchHooks Function()>;
+class $$ClustersTableFilterComposer
+    extends FilterComposer<_$AppDb, $ClustersTable> {
+  $$ClustersTableFilterComposer(super.$state);
+  ColumnFilters<int> get ts => $state.composableBuilder(
+      column: $state.table.ts,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get instrumentKey => $state.composableBuilder(
+      column: $state.table.instrumentKey,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get cluster => $state.composableBuilder(
+      column: $state.table.cluster,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get label => $state.composableBuilder(
+      column: $state.table.label,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $$ClustersTableOrderingComposer
+    extends OrderingComposer<_$AppDb, $ClustersTable> {
+  $$ClustersTableOrderingComposer(super.$state);
+  ColumnOrderings<int> get ts => $state.composableBuilder(
+      column: $state.table.ts,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get instrumentKey => $state.composableBuilder(
+      column: $state.table.instrumentKey,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get cluster => $state.composableBuilder(
+      column: $state.table.cluster,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get label => $state.composableBuilder(
+      column: $state.table.label,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
 
 class $AppDbManager {
   final _$AppDb _db;

@@ -23,6 +23,8 @@ class _SearchPageState extends State<SearchPage> {
         ElevatedButton(
           onPressed: () async {
             final results = await api.searchInstruments(ctrl.text.trim());
+            if (!context.mounted) return;
+
             showModalBottomSheet(context: context, builder: (_) {
               return ListView(
                 children: results.map((e) {

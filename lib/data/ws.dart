@@ -7,13 +7,14 @@ class WsClient {
 
   void connect(List<String> keys, void Function(List<dynamic>) onTicks) {
     _ch?.sink.close();
-    final uri = Uri.parse(Env.backendBase.replaceFirst('http', 'ws') + '/ws/ltp');
+    final uri = Uri.parse(
+      '${Env.backendBase.replaceFirst('http', 'ws')}/ws/ltp',
+    );
     _ch = WebSocketChannel.connect(uri);
     _ch!.sink.add(jsonEncode({'subscribe': keys}));
     _ch!.stream.listen((message) {
       final m = jsonDecode(message);
       if (m['ticks'] != null) onTicks(m['ticks']);
-      _ch!.sink.add('{}'); // ping
     });
   }
 

@@ -2,10 +2,10 @@
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+import '../core/env.dart';
 class ApiClient {
   /// Backend running in Dart server
-  static const String baseUrl = 'http://localhost:9090';
+  static const String baseUrl = Env.backendBase;
 
   // =====================================================
   // COMMON GET REQUEST
@@ -68,9 +68,7 @@ class ApiClient {
     );
 
     if (data is List) {
-      return data
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
+      return data.map((e) => Map<String, dynamic>.from(e)).toList();
     }
 
     return [];
@@ -96,9 +94,7 @@ class ApiClient {
     final data = await _get('/clusters');
 
     if (data is List) {
-      return data
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
+      return data.map((e) => Map<String, dynamic>.from(e)).toList();
     }
 
     return [];
@@ -126,11 +122,8 @@ class ApiClient {
     final data = await _get('/candles/$instrumentKey');
 
     if (data is List) {
-      return data
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
+      return data.map((e) => Map<String, dynamic>.from(e)).toList();
     }
-
     return [];
   }
 }
