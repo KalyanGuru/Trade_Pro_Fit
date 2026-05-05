@@ -1,35 +1,36 @@
+import 'dart:io';
 import 'package:dotenv/dotenv.dart';
 
 class Config {
-  static late String upstoxClientId;
-  static late String upstoxClientSecret;
+  static late String kiteApiKey;
+  static late String kiteApiSecret;
   static late String redirectUri;
-  static late String upstoxBase;
+
   static late int port;
 
   static void init() {
-    final env = DotEnv()..load();
+    // Try loading from explicit path first, then fallback
+    final scriptDir = File(Platform.script.toFilePath()).parent.parent;
+    final envFile = File('${scriptDir.path}/.env');
 
-    upstoxClientId =
-        env['UPSTOX_CLIENT_ID'] ??
-            'your_client_id';
+    final env = DotEnv();
+    if (envFile.existsSync()) {
+      env.load(['${scriptDir.path}/.env']);
+      print('📄 Loaded .env from: ${envFile.path}');
+    } else {
+      env.load();
+      print('📄 Loaded .env from working directory');
+    }
 
-    upstoxClientSecret =
-        env['UPSTOX_CLIENT_SECRET'] ??
-            'your_client_secret';
+    kiteApiKey = env['KITE_API_KEY'] ?? '';
+    kiteApiSecret = env['KITE_API_SECRET'] ?? '';
+
+    print('🔑 API Key: ${kiteApiKey.substring(0, 4)}...');
 
     redirectUri =
-        env['UPSTOX_REDIRECT_URI'] ??
+        env['KITE_REDIRECT_URI'] ??
             'http://localhost:9090/auth/callback';
 
-    upstoxBase =
-        env['UPSTOX_BASE'] ??
-            'https://api.upstox.com/v2';
-
-    port =
-        int.tryParse(
-          env['PORT'] ?? '9090',
-        ) ??
-            9090;
+    port = int.tryParse(env['PORT'] ?? '9090') ?? 9090;
   }
 }

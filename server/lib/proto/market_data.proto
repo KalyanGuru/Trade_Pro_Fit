@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+message LTPC {
+  double lastTradedPrice = 1;
+}
+
+message Feed {
+  LTPC ltpc = 1;
+}
+
+message MarketDataFeed {
+  map<string, Feed> feeds = 1;
+}

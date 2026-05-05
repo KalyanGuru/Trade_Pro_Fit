@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../data/api_client.dart';
 
@@ -58,7 +59,7 @@ class _AuthPageState extends State<AuthPage> {
 
     timer = Timer.periodic(
       const Duration(seconds: 2),
-          (_) async {
+      (_) async {
         final ok = await api.isConnected();
 
         if (ok && mounted) {
@@ -91,8 +92,11 @@ class _AuthPageState extends State<AuthPage> {
 
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to open Upstox login'),
+        SnackBar(
+          content: Text(
+            'Unable to open Kite login',
+            style: GoogleFonts.inter(),
+          ),
         ),
       );
     }
@@ -111,102 +115,142 @@ class _AuthPageState extends State<AuthPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Upstox Login"),
+        title: Text(
+          'Kite Login',
+          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+        ),
       ),
       body: checking
           ? const Center(
-        child: CircularProgressIndicator(),
-      )
+              child: CircularProgressIndicator(
+                color: Color(0xFF6C5CE7),
+              ),
+            )
 
-      // =====================================
-      // IF CONNECTED ALREADY
-      // =====================================
+          // =====================================
+          // IF CONNECTED ALREADY
+          // =====================================
           : connected
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 90,
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              "Upstox Connected",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.green,
-              ),
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(
-                  context,
-                  true,
-                );
-              },
-              child: const Text(
-                "Continue",
-              ),
-            ),
-          ],
-        ),
-      )
-
-      // =====================================
-      // LOGIN WEBVIEW
-      // =====================================
-          : kIsWeb
-          ? Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.open_in_new,
-                size: 72,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Open Upstox Login',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'After login, return to this tab.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed:
-                openingLogin ? null : openLoginInBrowser,
-                icon: openingLogin
-                    ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF00E676).withValues(alpha: 0.1),
+                          border: Border.all(
+                            color: const Color(0xFF00E676).withValues(alpha: 0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.check_rounded,
+                          color: Color(0xFF00E676),
+                          size: 52,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Kite Connected',
+                        style: GoogleFonts.inter(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF00E676),
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Your trading session is active',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: Colors.white38,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
+                        icon: const Icon(Icons.arrow_forward_rounded),
+                        label: const Text('Continue'),
+                      ),
+                    ],
                   ),
                 )
-                    : const Icon(Icons.login),
-                label: const Text('Continue with Upstox'),
-              ),
-            ],
-          ),
-        ),
-      )
-          : InAppWebView(
-        initialUrlRequest: URLRequest(
-          url: WebUri(api.authUrl),
-        ),
-      ),
+
+              // =====================================
+              // LOGIN
+              // =====================================
+              : kIsWeb
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFF6C5CE7)
+                                    .withValues(alpha: 0.1),
+                              ),
+                              child: const Icon(
+                                Icons.open_in_new_rounded,
+                                size: 36,
+                                color: Color(0xFF6C5CE7),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Text(
+                              'Connect to Kite',
+                              style: GoogleFonts.inter(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Authenticate with Zerodha Kite\nto start live trading data.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: Colors.white38,
+                                height: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            ElevatedButton.icon(
+                              onPressed:
+                                  openingLogin ? null : openLoginInBrowser,
+                              icon: openingLogin
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white54,
+                                      ),
+                                    )
+                                  : const Icon(Icons.login_rounded),
+                              label: const Text('Continue with Kite'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : InAppWebView(
+                      initialUrlRequest: URLRequest(
+                        url: WebUri(api.authUrl),
+                      ),
+                    ),
     );
   }
 }

@@ -3,26 +3,44 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/env.dart';
+
 class ApiClient {
-  /// Backend running in Dart server
   static const String baseUrl = Env.backendBase;
+  static const _timeout = Duration(seconds: 10);
+  static const _maxRetries = 2;
 
   // =====================================================
-  // COMMON GET REQUEST
+  // COMMON GET (with timeout & retry)
   // =====================================================
 
   Future<dynamic> _get(String endpoint) async {
     final uri = Uri.parse('$baseUrl$endpoint');
 
-    final response = await http.get(uri);
+    for (int attempt = 0; attempt <= _maxRetries; attempt++) {
+      try {
+        final res = await http.get(uri).timeout(_timeout);
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+        if (res.statusCode == 200) {
+          return jsonDecode(res.body);
+        }
+
+        // Don't retry on 4xx client errors
+        if (res.statusCode >= 400 && res.statusCode < 500) {
+          throw Exception('GET failed (${res.statusCode}) → $endpoint');
+        }
+
+        // Retry on 5xx server errors
+        if (attempt == _maxRetries) {
+          throw Exception('GET failed (${res.statusCode}) → $endpoint');
+        }
+      } catch (e) {
+        if (attempt == _maxRetries) rethrow;
+        // Wait briefly before retry
+        await Future.delayed(Duration(milliseconds: 500 * (attempt + 1)));
+      }
     }
 
-    throw Exception(
-      'Request failed (${response.statusCode}) -> $endpoint',
-    );
+    throw Exception('GET failed → $endpoint');
   }
 
   // =====================================================
@@ -31,36 +49,39 @@ class ApiClient {
 
   String get authUrl => '$baseUrl/auth/login';
 
+  Future<bool> isConnected() async {
+    try {
+      final res = await http
+          .get(Uri.parse('$baseUrl/auth/status'))
+          .timeout(_timeout);
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        return data['connected'] == true;
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  Future<void> logout() async {
+    await http.post(Uri.parse('$baseUrl/auth/logout')).timeout(_timeout);
+  }
+
   // =====================================================
-  // HEALTH CHECK
+  // HEALTH
   // =====================================================
 
   Future<Map<String, dynamic>> health() async {
     final data = await _get('/health');
-
     return Map<String, dynamic>.from(data);
   }
 
-  Future<bool> isConnected() async {
-    final res = await http.get(
-      Uri.parse('$baseUrl/auth/status'),
-    );
-
-    if (res.statusCode == 200) {
-      final data = jsonDecode(res.body);
-      return data['connected'] == true;
-    }
-
-    return false;
-  }
-
   // =====================================================
-  // SEARCH STOCKS / INSTRUMENTS
+  // SEARCH
   // =====================================================
 
   Future<List<Map<String, dynamic>>> searchInstruments(
-      String query,
-      ) async {
+      String query) async {
     if (query.trim().isEmpty) return [];
 
     final data = await _get(
@@ -75,19 +96,53 @@ class ApiClient {
   }
 
   // =====================================================
-  // GET AI PREDICTION
+  // START STREAM
+  // =====================================================
+
+  Future<void> startStream(String instrumentKey) async {
+    final uri = Uri.parse(
+      '$baseUrl/start/${Uri.encodeComponent(instrumentKey)}',
+    );
+
+    final res = await http.get(uri).timeout(_timeout);
+
+    if (res.statusCode != 200) {
+      throw Exception('Failed to start stream');
+    }
+  }
+
+  // =====================================================
+  // GET LIVE CANDLES
+  // =====================================================
+
+  Future<List<Map<String, dynamic>>> getCandles(
+      String instrumentKey) async {
+    final data = await _get(
+      '/candles/${Uri.encodeComponent(instrumentKey)}',
+    );
+
+    if (data is List) {
+      return data.map((e) => Map<String, dynamic>.from(e)).toList();
+    }
+
+    return [];
+  }
+
+  // =====================================================
+  // PREDICTION
   // =====================================================
 
   Future<Map<String, dynamic>> getPrediction(
-      String instrumentKey,
-      ) async {
-    final data = await _get('/predict/$instrumentKey');
+      String instrumentKey) async {
+    final data = await _get(
+      '/predict/${Uri.encodeComponent(instrumentKey)}',
+    );
 
     return Map<String, dynamic>.from(data);
   }
 
   // =====================================================
-  // GET CLUSTER DATA
+  // CLUSTERS
   // =====================================================
 
   Future<List<Map<String, dynamic>>> getClusters() async {
@@ -101,29 +156,15 @@ class ApiClient {
   }
 
   // =====================================================
-  // LIVE PRICE
+  // ML METRICS (real prediction history + MAE + RMSE)
   // =====================================================
 
-  Future<Map<String, dynamic>> getLivePrice(
-      String instrumentKey,
-      ) async {
-    final data = await _get('/live/$instrumentKey');
+  Future<Map<String, dynamic>> getMetrics(
+      String instrumentKey) async {
+    final data = await _get(
+      '/metrics/${Uri.encodeComponent(instrumentKey)}',
+    );
 
     return Map<String, dynamic>.from(data);
-  }
-
-  // =====================================================
-  // OHLC CANDLE DATA
-  // =====================================================
-
-  Future<List<Map<String, dynamic>>> getCandles(
-      String instrumentKey,
-      ) async {
-    final data = await _get('/candles/$instrumentKey');
-
-    if (data is List) {
-      return data.map((e) => Map<String, dynamic>.from(e)).toList();
-    }
-    return [];
   }
 }
