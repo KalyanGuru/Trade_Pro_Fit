@@ -2,6 +2,8 @@
 
 A new Flutter project for Final Year Project SNU
 Stock Behaviour Prediction and Investment Using Machine Learning to Maximize Profits
+
+
 Project Developed by: 
     Guru Kalyan Paul
     Chayan Samanta
