@@ -1,6 +1,16 @@
 # tread_pro_fit
 
 A new Flutter project for Final Year Project SNU
+Stock Behaviour Prediction and Investment Using Machine Learning to Maximize Profits
+Project Developed by: 
+    Guru Kalyan Paul
+    Chayan Samanta
+    Ayush Sinha
+    Sayanta Raj Ghosh 
+
+Project Guided by:
+    Prof. Santlal Prajapati
+
 
 ## Getting Started
 

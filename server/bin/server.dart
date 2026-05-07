@@ -74,7 +74,7 @@ Future<void> main() async {
       await api.exchangeToken(requestToken);
       return Response.ok(
         '<html><body style="font-family:sans-serif;text-align:center;padding:60px;">'
-        '<h1 style="color:green;">✅ Kite Connected Successfully</h1>'
+        '<h1 style="color:green;">Kite Connected Successfully</h1>'
         '<p>You can close this tab and return to the app.</p>'
         '</body></html>',
         headers: {'Content-Type': 'text/html'},
@@ -352,14 +352,14 @@ Future<void> main() async {
               // Record prediction for MAE/RMSE tracking
               candle.recordPrediction(cleanKey, prediction / 100, currentLtp);
 
-              print('🤖 ML Prediction for $cleanKey: ${prediction.toStringAsFixed(4)}%');
+              print('ML Prediction for $cleanKey: ${prediction.toStringAsFixed(4)}%');
             } catch (e) {
-              print('⚠️ ML training failed: $e');
+              print('ML training failed: $e');
             }
           }
         }
       } catch (e) {
-        print('⚠️ Feature computation failed: $e');
+        print('Feature computation failed: $e');
       }
     }
 
@@ -448,7 +448,7 @@ Future<void> main() async {
   // It broadcasts ticks received from Kite to all connected Flutter clients.
 
   final wsHandler = webSocketHandler((WebSocketChannel webSocket) {
-    print('🔌 Flutter client connected');
+    print('Flutter client connected');
     _clients.add(webSocket);
 
     webSocket.stream.listen(
@@ -457,18 +457,18 @@ Future<void> main() async {
         try {
           final data = jsonDecode(message as String);
           if (data['subscribe'] != null) {
-            print('📡 Client subscribed: ${data['subscribe']}');
+            print('Client subscribed: ${data['subscribe']}');
           }
         } catch (e) {
-          print('⚠️ Client message parse error: $e');
+          print('Client message parse error: $e');
         }
       },
       onDone: () {
-        print('🔌 Flutter client disconnected');
+        print('Flutter client disconnected');
         _clients.remove(webSocket);
       },
       onError: (e) {
-        print('❌ Client error: $e');
+        print('Client error: $e');
         _clients.remove(webSocket);
       },
     );
@@ -494,5 +494,5 @@ Future<void> main() async {
     Config.port,
   );
 
-  print('🚀 Server running on http://localhost:${server.port}');
+  print('Server running on http://localhost:${server.port}');
 }

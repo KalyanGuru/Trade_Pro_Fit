@@ -16,16 +16,16 @@ class Config {
     final env = DotEnv();
     if (envFile.existsSync()) {
       env.load(['${scriptDir.path}/.env']);
-      print('📄 Loaded .env from: ${envFile.path}');
+      //print('Loaded .env from: ${envFile.path}');
     } else {
       env.load();
-      print('📄 Loaded .env from working directory');
+      //print('Loaded .env from working directory');
     }
 
     kiteApiKey = env['KITE_API_KEY'] ?? '';
     kiteApiSecret = env['KITE_API_SECRET'] ?? '';
 
-    print('🔑 API Key: ${kiteApiKey.substring(0, 4)}...');
+    print('API Key: ${kiteApiKey.substring(0, 4)}...');
 
     redirectUri =
         env['KITE_REDIRECT_URI'] ??

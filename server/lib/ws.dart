@@ -24,7 +24,7 @@ class WsService {
     // Close any existing connection first
     close();
 
-    print('🔗 Connecting to Kite WS...');
+    print('Connecting to Kite WS...');
     print('URL: $wsUrl');
 
     _channel = IOWebSocketChannel.connect(Uri.parse(wsUrl));
@@ -38,7 +38,7 @@ class WsService {
       'v': tokens,
     });
     _channel!.sink.add(subMsg);
-    print('✅ WS SUBSCRIBED: $tokens');
+    print('WS SUBSCRIBED: $tokens');
 
     // Set mode to "full" for complete tick data (OHLCV + depth)
     final modeMsg = jsonEncode({
@@ -46,7 +46,7 @@ class WsService {
       'v': ['full', tokens],
     });
     _channel!.sink.add(modeMsg);
-    print('✅ WS MODE SET: full');
+    print('WS MODE SET: full');
 
     _channel!.stream.listen(
       (msg) {
@@ -64,7 +64,7 @@ class WsService {
           } else if (msg is List<int>) {
             bytes = Uint8List.fromList(msg);
           } else {
-            print('⚠️ Unknown WS message type: ${msg.runtimeType}');
+            print('Unknown WS message type: ${msg.runtimeType}');
             return;
           }
 
@@ -75,14 +75,14 @@ class WsService {
 
           _handleBinaryFrame(bytes, onTick);
         } catch (e) {
-          print('❌ WS FRAME ERROR: $e');
+          print('WS FRAME ERROR: $e');
         }
       },
       onError: (e) {
-        print('❌ WS CONNECTION ERROR: $e');
+        print('WS CONNECTION ERROR: $e');
       },
       onDone: () {
-        print('🔌 WS CLOSED');
+        print('WS CLOSED');
       },
     );
   }
@@ -93,7 +93,7 @@ class WsService {
   void _handleTextFrame(
       String msg, Function(Map<String, dynamic>) onTick) {
     final preview = msg.length > 120 ? '${msg.substring(0, 120)}...' : msg;
-    print('📝 TEXT FRAME: $preview');
+    print('TEXT FRAME: $preview');
 
     try {
       final j = jsonDecode(msg);
@@ -101,7 +101,7 @@ class WsService {
       // Some Kite responses come as JSON (e.g. order postbacks)
       if (j is Map && j.containsKey('type')) {
         if (j['type'] == 'order') {
-          print('📋 Order update received');
+          print('Order update received');
         }
         return;
       }
@@ -115,7 +115,7 @@ class WsService {
               final ltp = (tick['last_price'] ?? tick['ltp'] ?? 0).toDouble();
               final key = tick['instrument_token']?.toString() ?? '';
               if (ltp > 0 && key.isNotEmpty) {
-                print('🔥 LIVE (json): $key -> $ltp');
+                print('LIVE (json): $key -> $ltp');
                 onTick({
                   'instrument_key': key,
                   'ltp': ltp,
@@ -152,7 +152,7 @@ class WsService {
     final numPackets = bd.getInt16(0, Endian.big);
 
     if (numPackets <= 0 || numPackets > 200) {
-      print('⚠️ Invalid packet count: $numPackets');
+      print('Invalid packet count: $numPackets');
       return;
     }
 
@@ -197,7 +197,7 @@ class WsService {
     }
 
     if (ltp > 0) {
-      print('🔥 LIVE: token=$instrumentToken -> ₹$ltp');
+      print('LIVE: token=$instrumentToken -> ₹$ltp');
       onTick(tick);
     }
   }
