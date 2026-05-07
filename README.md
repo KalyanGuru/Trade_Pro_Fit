@@ -5,9 +5,13 @@ Stock Behaviour Prediction and Investment Using Machine Learning to Maximize Pro
 
 
 Project Developed by: 
+
     Guru Kalyan Paul
+    
     Chayan Samanta
+    
     Ayush Sinha
+    
     Sayanta Raj Ghosh 
 
 Project Guided by:
